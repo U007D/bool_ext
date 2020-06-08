@@ -1,16 +1,17 @@
 [package]
-authors = ["u007d <b2b@humanenginuity.com>"]
-categories = []
+authors = ["u007d <curly@humanenginuity.com>"]
+categories = ["rust-patterns", "data-structures", "parser-implementations"]
+description = """A crate which defines and implements a complete set of `Option`/`Result`-style \
+                 Boolean functional combinators on Rust's `bool` primitive type."""
 edition = "2018"
-keywords = []
-license = "MIT or Apache-2.0"
+keywords = ["bool", "boolean", "functional", "combinator", "adapter"]
+license = "MIT OR Apache-2.0"
 name = "bool_ext"
 readme = "README.md"
 repository = "https://github.com/u007d/bool_ext"
-version = "0.1.0"
+version = "0.1.1"
 
 [dependencies]
-thiserror = "*"
 
 [profile.dev]
 codegen-units = 1
