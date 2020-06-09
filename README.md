@@ -1,4 +1,4 @@
-#bool_ext
+# bool_ext
 A crate which defines and implements a complete set of Boolean functional combinators.
 
 ## FAQ

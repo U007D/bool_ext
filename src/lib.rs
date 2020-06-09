@@ -595,7 +595,7 @@ pub trait BoolExt {
     /// vec.contains(&2).do_true(|| vec.iter_mut().for_each(|el| *el = -*el));
     /// assert!(vec.eq(&[-1, -2, -3]));
     /// ```
-    fn do_true<F: FnOnce()>(&self, t: F);
+    fn do_true<F: FnOnce()>(&self, t: F) -> bool;
 
     /// ## Perform side-effect if `false`, otherwise do nothing
     /// ### Examples:    
@@ -609,7 +609,7 @@ pub trait BoolExt {
     /// vec.contains(&4).do_false(|| vec.push(4));
     /// assert!(vec.eq(&[1, 2, 3, 4]));
     /// ```
-    fn do_false<F: FnOnce()>(&self, f: F);
+    fn do_false<F: FnOnce()>(&self, f: F) -> bool;
 
     /// ## Transforms `false` => `panic!()`
     /// ## panic with message if `false`, otherwise do nothing
@@ -806,15 +806,16 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn do_true<F: FnOnce() -> ()>(&self, t: F) {
+    fn do_true<F: FnOnce() -> ()>(&self, t: F) -> bool {
         match self {
             true => t(),
             false => (),
         }
+        *self
     }
 
     #[inline]
-    fn do_false<F: FnOnce() -> ()>(&self, f: F) {
+    fn do_false<F: FnOnce()>(&self, f: F) -> bool {
         (!self).do_true(f)
     }
 
