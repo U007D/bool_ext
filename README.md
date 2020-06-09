@@ -3,7 +3,7 @@ A crate which defines and implements a complete set of Boolean functional combin
 
 ## FAQ
 ### Aren't there already crates like this?
-Yes, there are, notably Daniel Keep's [boolinator](boolinator = "2.4.0"), and 
+Yes, there are, notably Daniel Keep's [boolinator](https://crates.io/crates/boolinator), and 
 Rust's [`then()` and `then_some()`](https://doc.rust-lang.org/std/primitive.bool.html#method.then
 ) methods (currently unstable at the time of this writing).
 
@@ -59,8 +59,8 @@ You are not alone!  Debuggers have not yet caught up to fluent API design techni
 debugging fluent interfaces can indeed be objectively more work.  On the other hand, proponents 
 (such as me) will tell you that by elevating one's thinking from "micromanaging the CPU" to
 expressing one's intent by "shaping the data", far fewer bugs will be written in the first place, 
-and the resulting code will be more expressive and more maintainable (once the maintaining party has
-sufficient experience with this style of coding).
+and the resulting code will be both more expressive and more maintainable (once the maintaining 
+party has sufficient experience with this style of coding).
 
 `bool_ext` is implemented according to Bjarne Stroustrup's now classic definition of a zero
 -overhead abstraction, where 1) you only pay for what you use and 2) you couldn't implement the
@@ -70,14 +70,14 @@ Addressing 1), the `bool_ext` create is very small, takes no dependencies, and m
 , *any methods* defined within the crate that *you do not use* are stripped out by the compiler
 and *are not a part of your resulting binary*.
 
-Regarding 2), each method is `#[inline]`'d, adheres to the Single Responsibility Principle
-, minimizes register pressure from inlining and should compile down to exactly the same (or better)
-code that would be written by hand.
+Regarding 2), each method is `#[inline]`'d, adheres to the Single Responsibility Principle, 
+minimizes register pressure from inlining and when fully optimized (typically in release mode) 
+should compile down to exactly the same (or better) code that could be written by hand.
 
 ## License
 Licensed under either:
-    * MIT license (see LICENSE or http://opensource.org/licenses/MIT)
-    * Apache License, Version 2.0 (see LICENSE or http://www.apache.org/licenses/LICENSE-2.0)
+    * MIT license (see LICENSE-MIT file)
+    * Apache License, Version 2.0 (see LICENSE-APACHE file)
 at your option.
 
 ## Contributions
