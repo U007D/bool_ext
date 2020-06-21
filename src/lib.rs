@@ -594,6 +594,7 @@ pub trait BoolExt {
     /// let mut vec = vec![1, 2, 3];
     /// vec.contains(&2).do_true(|| vec.iter_mut().for_each(|el| *el = -*el));
     /// assert!(vec.eq(&[-1, -2, -3]));
+    /// assert!(vec.contains(&-2).do_true(|| {}), true);
     /// ```
     fn do_true<F: FnOnce()>(self, t: F) -> bool;
 
@@ -608,6 +609,7 @@ pub trait BoolExt {
     /// let mut vec = vec![1, 2, 3];
     /// vec.contains(&4).do_false(|| vec.push(4));
     /// assert!(vec.eq(&[1, 2, 3, 4]));
+    /// assert!(vec.contains(&4).do_false(|| {}), false);
     /// ```
     fn do_false<F: FnOnce()>(self, f: F) -> bool;
 
@@ -816,7 +818,7 @@ impl BoolExt for bool {
 
     #[inline]
     fn do_false<F: FnOnce()>(self, f: F) -> bool {
-        (!self).do_true(f)
+        !(!self).do_true(f)
     }
 
     #[inline]
