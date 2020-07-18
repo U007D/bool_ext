@@ -9,12 +9,11 @@ license = "MIT OR Apache-2.0"
 name = "bool_ext"
 readme = "README.md"
 repository = "https://github.com/u007d/bool_ext"
-version = "0.3.1"
+version = "0.4.0"
 
 [dependencies]
 
 [profile.dev]
-codegen-units = 1
 debug = true
 debug-assertions = true
 lto = false
@@ -26,15 +25,17 @@ rpath = false
 codegen-units = 1
 debug = false
 debug-assertions = false
-lto = true
+lto = "fat"
 opt-level = 3
 panic = "unwind"
 rpath = false
 
 [profile.test]
-codegen-units = 1
 debug = true
 debug-assertions = true
 lto = false
 opt-level = 0
 rpath = false
+
+[dev-dependencies]
+assert2 = "0.3"
