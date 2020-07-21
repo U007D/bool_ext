@@ -441,35 +441,47 @@ pub trait BoolExt {
     /// ```
     fn or_do<F: FnOnce()>(self, f: F) -> bool;
 
-    /// ## Transforms `Ok::<bool>` => `Ok::<T>`, otherwise does nothing
+    /// ## Perform fallible side-effect if `true`, otherwise do nothing
     /// ### Examples:
     /// ```
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     ///
+    /// #[derive(Clone, Debug, PartialEq)]
+    /// enum SomeError {}
+    ///
     /// #[derive(Debug, PartialEq)]
     /// struct Foo;
     ///
     /// let mut vec = vec![1, 2, 3];
-    /// vec.contains(&2).and_do(|| vec.iter_mut().for_each(|el| *el = -*el));
+    /// vec.contains(&2).and_try_do(|| {
+    ///     vec.iter_mut().for_each(|el| *el = -*el);
+    ///     Ok::<_, SomeError>(())
+    /// });
     /// assert!(vec.eq(&[-1, -2, -3]));
     /// ```
-    fn and_try_do<F: FnOnce() -> Result<bool, E>, E>(self, t: F) -> Result<bool, E>;
+    fn and_try_do<F: FnOnce() -> Result<(), E>, E>(self, t: F) -> Result<bool, E>;
 
-    /// ## Perform side-effect if `false`, otherwise do nothing
+    /// ## Perform fallible side-effect if `false`, otherwise do nothing
     /// ### Examples:    
     /// ```
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     ///
+    /// #[derive(Clone, Debug, PartialEq)]
+    /// enum SomeError {}
+    ///
     /// #[derive(Debug, PartialEq)]
     /// struct Foo;
     ///
     /// let mut vec = vec![1, 2, 3];
-    /// vec.contains(&4).or_do(|| vec.push(4));
+    /// vec.contains(&4).or_try_do(|| {
+    ///     vec.push(4);
+    ///     Ok::<_, SomeError>(())
+    /// });
     /// assert!(vec.eq(&[1, 2, 3, 4]));
     /// ```
-    fn or_try_do<F: FnOnce() -> Result<bool, E>, E>(self, f: F) -> Result<bool, E>;
+    fn or_try_do<F: FnOnce() -> Result<(), E>, E>(self, f: F) -> Result<bool, E>;
 
     /// ## Transforms `false` => `panic!()`
     /// ## panic with message if `false`, otherwise do nothing
@@ -613,7 +625,7 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn and_try_do<F: FnOnce() -> Result<T, E>, T, E>(self, t: F) -> Result<bool, E> {
+    fn and_try_do<F: FnOnce() -> Result<(), E>, E>(self, t: F) -> Result<bool, E> {
         match self {
             true => {
                 t()?;
@@ -624,8 +636,8 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn or_try_do<F: FnOnce() -> Result<bool, E>, E>(self, f: F) -> Result<bool, E> {
-        unimplemented!()
+    fn or_try_do<F: FnOnce() -> Result<(), E>, E>(self, f: F) -> Result<bool, E> {
+        (!self).and_try_do(f).map(|_| self)
     }
 
     #[inline]

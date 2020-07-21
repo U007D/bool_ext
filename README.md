@@ -51,7 +51,7 @@ or imperative/declarative hybrid code:
 ```rust
     // ...
     haystack.contains(&item)
-            .and_do(|| haystack.push(item));
+            .or_do(|| haystack.push(item));
 ```
 
 ### Should I use this? / I'm not sure about method-chaining/functional combinators
