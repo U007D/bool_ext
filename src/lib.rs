@@ -441,6 +441,48 @@ pub trait BoolExt {
     /// ```
     fn or_do<F: FnOnce()>(self, f: F) -> bool;
 
+    /// ## Perform fallible side-effect if `true`, otherwise do nothing
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Clone, Debug, PartialEq)]
+    /// enum SomeError {}
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let mut vec = vec![1, 2, 3];
+    /// vec.contains(&2).and_try_do(|| {
+    ///     vec.iter_mut().for_each(|el| *el = -*el);
+    ///     Ok::<_, SomeError>(())
+    /// });
+    /// assert!(vec.eq(&[-1, -2, -3]));
+    /// ```
+    fn and_try_do<F: FnOnce() -> Result<(), E>, E>(self, t: F) -> Result<bool, E>;
+
+    /// ## Perform fallible side-effect if `false`, otherwise do nothing
+    /// ### Examples:    
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Clone, Debug, PartialEq)]
+    /// enum SomeError {}
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let mut vec = vec![1, 2, 3];
+    /// vec.contains(&4).or_try_do(|| {
+    ///     vec.push(4);
+    ///     Ok::<_, SomeError>(())
+    /// });
+    /// assert!(vec.eq(&[1, 2, 3, 4]));
+    /// ```
+    fn or_try_do<F: FnOnce() -> Result<(), E>, E>(self, f: F) -> Result<bool, E>;
+
     /// ## Transforms `false` => `panic!()`
     /// ## panic with message if `false`, otherwise do nothing
     /// ### Examples:    
@@ -580,6 +622,22 @@ impl BoolExt for bool {
     #[inline]
     fn or_do<F: FnOnce()>(self, f: F) -> bool {
         !(!self).and_do(f)
+    }
+
+    #[inline]
+    fn and_try_do<F: FnOnce() -> Result<(), E>, E>(self, t: F) -> Result<bool, E> {
+        match self {
+            true => {
+                t()?;
+                Ok(self)
+            }
+            false => Ok(self),
+        }
+    }
+
+    #[inline]
+    fn or_try_do<F: FnOnce() -> Result<(), E>, E>(self, f: F) -> Result<bool, E> {
+        (!self).and_try_do(f).map(|_| self)
     }
 
     #[inline]

@@ -51,7 +51,7 @@ or imperative/declarative hybrid code:
 ```rust
     // ...
     haystack.contains(&item)
-            .do_false(|| haystack.push(item));
+            .or_do(|| haystack.push(item));
 ```
 
 ### Should I use this? / I'm not sure about method-chaining/functional combinators
@@ -75,12 +75,13 @@ minimizes register pressure from inlining and when fully optimized (typically in
 should compile down to exactly the same (or better) code that could be written by hand.
 
 ### What about negating a boolean?
-Originally `bool_ext` contained a `_false()` variant for almost every method.  Thanks to input from
-[izik1](https://github.com/izik1), and a lot of consideration, I decided that readability didn't
-suffer when using `boolean_condition().not().ok()` as opposed to `boolean_condition().ok_false()` or
-`boolean_condition().or_ok()`.  Because of the order of operations and the resulting parentheses, I 
-do think `(!boolean_condition()).ok()` is significantly less readable, but as izik1 pointed out,
-`std::ops::Not` alleviates this.  Thank you, izik1! :)
+Up until v0.4.0, `bool_ext` contained a `_false()` variant for almost every method.  Thanks to input
+from [izik1](https://github.com/izik1), and a lot of consideration, I decided that readability 
+didn't suffer when using `boolean_condition().not().ok()` as opposed to 
+`boolean_condition().ok_false()` or `boolean_condition().or_ok()`.  I do find 
+`(!boolean_condition()).ok()` is significantly less readable (because of the required parentheses 
+and because the order of operations no longer proceeds exclusively left-to-right), but as izik1 
+pointed out, `std::ops::Not` alleviates this.  Thank you, izik1! :)
 
 ## License
 Licensed under either:
