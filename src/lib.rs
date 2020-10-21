@@ -1,6 +1,3 @@
-// To use the `unsafe` keyword, change to `#![allow(unsafe_code)]` (do not remove); aids auditing.
-#![forbid(unsafe_code)]
-#![forbid(bare_trait_objects)]
 #![warn(clippy::all, clippy::nursery, clippy::pedantic, rust_2018_idioms)]
 // Safety-critical application lints
 #![deny(
@@ -10,7 +7,7 @@
     clippy::integer_arithmetic,
     clippy::unwrap_used
 )]
-#![warn(clippy::unused_self)]
+#![warn()]
 #![allow(
     clippy::implicit_return,
     clippy::iter_nth_zero,
@@ -18,8 +15,12 @@
     clippy::missing_errors_doc,
     clippy::module_name_repetitions
 )]
+// To use the `unsafe` keyword, change to `#![allow(unsafe_code)]` (do not remove); aids auditing.
+#![forbid(unsafe_code)]
+#![forbid(bare_trait_objects)]
 // Uncomment before ship to reconcile use of possibly redundant crates, debug remnants, missing
 // license files and more
+#![allow(clippy::blanket_clippy_restriction_lints)]
 #![warn(clippy::cargo, clippy::restriction, missing_docs, warnings)]
 #![allow(clippy::implicit_return)]
 //! `bool_ext` is a crate which defines and implements a complete set of Boolean functional
@@ -642,6 +643,7 @@ impl BoolExt for bool {
 
     #[inline]
     fn expect(self, msg: &str) {
+        #[allow(clippy::panic)]
         match self {
             true => (),
             false => panic!("{}", msg),
