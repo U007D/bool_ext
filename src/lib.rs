@@ -7,7 +7,6 @@
     clippy::integer_arithmetic,
     clippy::unwrap_used
 )]
-#![warn()]
 #![allow(
     clippy::implicit_return,
     clippy::iter_nth_zero,
