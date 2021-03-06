@@ -37,7 +37,7 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&2).as_option() == Some(()));
+    /// assert!(vec.contains(&2).to_option() == Some(()));
     /// ```
     /// ```
     /// use assert2::assert;
@@ -45,9 +45,10 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&4).as_option() == None);
+    /// assert!(vec.contains(&4).to_option() == None);
     /// ```
-    fn as_option(self) -> Option<()>;
+    #[allow(clippy::wrong_self_convention)]
+    fn to_option(self) -> Option<()>;
 
     /// ## Transforms `true` => `Some(T)`, `false` => `None`
     /// ### Examples:
@@ -121,7 +122,7 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&2).as_result() == Ok(()));
+    /// assert!(vec.contains(&2).to_result() == Ok(()));
     /// ```
     /// ```
     /// use assert2::assert;
@@ -129,9 +130,10 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&4).as_result() == Err(()));
+    /// assert!(vec.contains(&4).to_result() == Err(()));
     /// ```
-    fn as_result(self) -> Result<(), ()>;
+    #[allow(clippy::wrong_self_convention, clippy::result_unit_err)]
+    fn to_result(self) -> Result<(), ()>;
 
     /// ## Transforms `true` => `Ok(T)`, `false` => `Err(())`
     /// ### Examples:
@@ -157,7 +159,34 @@ pub trait BoolExt {
     ///
     /// assert!(vec.contains(&4).ok(Foo) == Err(()));
     /// ```
+    #[allow(clippy::result_unit_err)]
     fn ok<T>(self, ok: T) -> Result<T, ()>;
+
+    /// ## Transforms `true` => `Ok(())`, `false` => `Err(E)`
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&4).err(Foo) == Err(Foo));
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&2).err(Foo) == Ok(()));
+    /// ```
+    fn err<E>(self, err: E) -> Result<(), E>;
 
     /// ## Transforms `true` => `Ok(T)`, `false` => `Err(())`, lazily evaluated
     /// ### Examples:
@@ -194,6 +223,7 @@ pub trait BoolExt {
     /// // elide `expensive_computation()`
     /// assert!(vec.contains(&4).ok_with(|| expensive_computation()) == Err(()));
     /// ```
+    #[allow(clippy::result_unit_err)]
     fn ok_with<F: FnOnce() -> T, T>(self, ok: F) -> Result<T, ()>;
 
     /// ## Transforms `true` => `Ok(T)`, `false` => `Err(E)`
@@ -219,7 +249,7 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&2).ok_or_err(Foo, Error) == Ok(Foo));
+    /// assert!(vec.contains(&2).ok_or_err(Error, Foo) == Ok(Foo));
     /// ```
     /// ```
     /// use assert2::assert;
@@ -241,9 +271,9 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&4).ok_or_err(Foo, Error) == Err(Error));
+    /// assert!(vec.contains(&4).ok_or_err(Error, Foo) == Err(Error));
     /// ```
-    fn ok_or_err<T, E>(self, ok: T, err: E) -> Result<T, E>;
+    fn ok_or_err<T, E>(self, err: E, ok: T) -> Result<T, E>;
 
     /// ## Transforms `true` => `Ok(T)`, `false` => `Err(E)`, lazily evaluated
     /// ### Examples:
@@ -270,8 +300,8 @@ pub trait BoolExt {
     /// let vec = vec![1, 2, 3];
     ///
     /// assert!(vec.contains(&2).ok_or_err_with(
-    ///     || expensive_ok_computation(),
-    ///     || expensive_err_computation()) == Ok(Foo));
+    ///     || expensive_err_computation(),
+    ///     || expensive_ok_computation()) == Ok(Foo));
     /// ```
     /// ```
     /// use assert2::assert;
@@ -297,13 +327,13 @@ pub trait BoolExt {
     ///
     /// // elide `expensive_computation()`
     /// assert!(vec.contains(&4).ok_or_err_with(
-    ///     || expensive_ok_computation(),
-    ///     || expensive_err_computation()) == Err(Bar));
+    ///     || expensive_err_computation(),
+    ///     || expensive_ok_computation()) == Err(Bar));
     /// ```
     fn ok_or_err_with<F: FnOnce() -> T, G: FnOnce() -> E, T, E>(
         self,
-        ok: F,
         err: G,
+        ok: F,
     ) -> Result<T, E>;
 
     /// `bool` => `T`
@@ -313,8 +343,6 @@ pub trait BoolExt {
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     /// use std::fmt::Formatter;
-    ///
-    /// #[derive(Debug, PartialEq)]
     ///
     /// let vec = vec![1, 2, 3];
     ///
@@ -388,9 +416,9 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&2).map_or_else(
-    ///     || SetPresence::In,
-    ///     || SetPresence::Out) == SetPresence::In);
+    /// assert_eq!(vec.contains(&2).map_or_else(
+    ///     || SetPresence::Out,
+    ///     || SetPresence::In), SetPresence::In);
     /// ```
     /// ```
     /// use assert2::assert;
@@ -405,11 +433,11 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
-    /// assert!(vec.contains(&4).map_or_else(
-    ///     || SetPresence::In,
-    ///     || SetPresence::Out) == SetPresence::Out);
+    /// assert_eq!(vec.contains(&4).map_or_else(
+    ///     || SetPresence::Out,
+    ///     || SetPresence::In), SetPresence::Out);
     /// ```
-    fn map_or_else<F: FnOnce() -> T, G: FnOnce() -> T, T>(self, t: F, f: G) -> T;
+    fn map_or_else<F: FnOnce() -> T, G: FnOnce() -> T, T>(self, f: G, t: F) -> T;
 
     /// ## Perform side-effect if `true`, otherwise do nothing
     /// ### Examples:
@@ -522,7 +550,7 @@ pub trait BoolExt {
 #[allow(clippy::use_self)]
 impl BoolExt for bool {
     #[inline]
-    fn as_option(self) -> Option<()> {
+    fn to_option(self) -> Option<()> {
         match self {
             true => Some(()),
             false => None,
@@ -546,7 +574,7 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn as_result(self) -> Result<(), ()> {
+    fn to_result(self) -> Result<(), ()> {
         match self {
             true => Ok(()),
             false => Err(()),
@@ -562,6 +590,14 @@ impl BoolExt for bool {
     }
 
     #[inline]
+    fn err<E>(self, err: E) -> Result<(), E> {
+        match self {
+            true => Ok(()),
+            false => Err(err),
+        }
+    }
+
+    #[inline]
     fn ok_with<F: FnOnce() -> T, T>(self, ok: F) -> Result<T, ()> {
         match self {
             true => Ok(ok()),
@@ -570,7 +606,7 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn ok_or_err<T, E>(self, ok: T, err: E) -> Result<T, E> {
+    fn ok_or_err<T, E>(self, err: E, ok: T) -> Result<T, E> {
         match self {
             true => Ok(ok),
             false => Err(err),
@@ -580,8 +616,8 @@ impl BoolExt for bool {
     #[inline]
     fn ok_or_err_with<F: FnOnce() -> T, G: FnOnce() -> E, T, E>(
         self,
-        ok: F,
         err: G,
+        ok: F,
     ) -> Result<T, E> {
         match self {
             true => Ok(ok()),
@@ -603,7 +639,7 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn map_or_else<F: FnOnce() -> T, G: FnOnce() -> T, T>(self, t: F, f: G) -> T {
+    fn map_or_else<F: FnOnce() -> T, G: FnOnce() -> T, T>(self, f: G, t: F) -> T {
         match self {
             true => t(),
             false => f(),
