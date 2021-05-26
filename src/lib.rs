@@ -477,6 +477,18 @@ pub trait BoolExt {
     /// ```
     fn map_or_else<F: FnOnce() -> T, G: FnOnce() -> T, T>(self, f: G, t: F) -> T;
 
+    /// `bool` => `T`
+    /// ## Transforms `true` => `T`, `false` => `T`
+    /// Does the same as `map_or_else` but with multiple methods to improve readability.
+    /// ### Examples:
+    /// ```
+    /// use bool_ext::BoolExt;
+    ///
+    /// assert_eq!(true.map_true(|| 42).map_false(|| 21), 42);
+    /// assert_eq!(false.map_true(|| 42).map_false(|| 21), 21);
+    /// ```
+    fn map_true<T, FT: FnOnce() -> T>(self, true_mapping: FT) -> TrueMapped<T, FT>;
+
     /// ## Perform side-effect if `true`, otherwise do nothing
     /// ### Examples:
     /// ```
@@ -693,6 +705,14 @@ impl BoolExt for bool {
     }
 
     #[inline]
+    fn map_true<T, FT: FnOnce() -> T>(self, true_mapping: FT) -> TrueMapped<T, FT> {
+        TrueMapped {
+            value: self,
+            true_mapping,
+        }
+    }
+
+    #[inline]
     fn and_do<F: FnOnce()>(self, t: F) -> bool {
         match self {
             true => t(),
@@ -728,6 +748,26 @@ impl BoolExt for bool {
         match self {
             true => (),
             false => panic!("{}", msg),
+        }
+    }
+}
+
+/// The type of the outcome of the `map_true` method.
+pub struct TrueMapped<T, FT: FnOnce() -> T> {
+    /// The value of the boolean which should be transformed.
+    value: bool,
+    /// The closure which should be used if the `value` is true.
+    true_mapping: FT,
+}
+
+impl<T, FT: FnOnce() -> T> TrueMapped<T, FT> {
+    /// Transforms the intermediate type into the final type.
+    #[inline]
+    pub fn map_false<FF: FnOnce() -> T>(self, false_mapping: FF) -> T {
+        if self.value {
+            (self.true_mapping)()
+        } else {
+            false_mapping()
         }
     }
 }
