@@ -21,9 +21,13 @@
 // license files and more
 #![allow(clippy::blanket_clippy_restriction_lints)]
 #![warn(clippy::cargo, clippy::restriction, missing_docs, warnings)]
-#![allow(clippy::implicit_return)]
+#![allow(clippy::implicit_return, clippy::semicolon_if_nothing_returned)]
 //! `bool_ext` is a crate which defines and implements a complete set of Boolean functional
 //! combinators.  See this crate's `README.md` for more background.
+
+#![cfg_attr(not(feature = "std"), no_std)]
+
+use core::ops::Not;
 
 /// `BoolExt` trait defines and implements a complete set of Boolean functional combinators.
 pub trait BoolExt {
@@ -299,8 +303,6 @@ pub trait BoolExt {
     /// #[derive(Debug, PartialEq)]
     /// struct Error;
     ///
-    /// impl std::error::Error for Error {}
-    ///
     /// impl std::fmt::Display for Error {
     ///     fn fmt(&self,f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     ///         write!(f, "BoolExt Example Error")
@@ -394,8 +396,6 @@ pub trait BoolExt {
     /// use bool_ext::BoolExt;
     /// use std::fmt::Formatter;
     ///
-    /// #[derive(Debug, PartialEq)]
-    ///
     /// let vec = vec![1, 2, 3];
     ///
     /// assert!(vec.contains(&4).map_or(None, || {
@@ -413,8 +413,6 @@ pub trait BoolExt {
     /// use bool_ext::BoolExt;
     /// use std::fmt::Formatter;
     ///
-    /// #[derive(Debug, PartialEq)]
-    ///
     /// let vec = vec![1, 2, 3];
     ///
     /// assert!(vec.contains(&2).map_or_default(|| {
@@ -426,8 +424,6 @@ pub trait BoolExt {
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     /// use std::fmt::Formatter;
-    ///
-    /// #[derive(Debug, PartialEq)]
     ///
     /// let vec = vec![1, 2, 3];
     ///
@@ -483,9 +479,6 @@ pub trait BoolExt {
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Foo;
-    ///
     /// let mut vec = vec![1, 2, 3];
     /// vec.contains(&2).and_do(|| vec.iter_mut().for_each(|el| *el = -*el));
     /// assert!(vec.eq(&[-1, -2, -3]));
@@ -497,9 +490,6 @@ pub trait BoolExt {
     /// ```
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
-    ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Foo;
     ///
     /// let mut vec = vec![1, 2, 3];
     /// vec.contains(&4).or_do(|| vec.push(4));
@@ -515,9 +505,6 @@ pub trait BoolExt {
     ///
     /// #[derive(Clone, Debug, PartialEq)]
     /// enum SomeError {}
-    ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Foo;
     ///
     /// let mut vec = vec![1, 2, 3];
     /// vec.contains(&2).and_try_do(|| {
@@ -537,9 +524,6 @@ pub trait BoolExt {
     /// #[derive(Clone, Debug, PartialEq)]
     /// enum SomeError {}
     ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Foo;
-    ///
     /// let mut vec = vec![1, 2, 3];
     /// vec.contains(&4).or_try_do(|| {
     ///     vec.push(4);
@@ -556,9 +540,6 @@ pub trait BoolExt {
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Foo;
-    ///
     /// let mut vec = vec![1, 2, 3];
     ///
     /// let res = std::panic::catch_unwind(|| {
@@ -571,9 +552,6 @@ pub trait BoolExt {
     /// use assert2::assert;
     /// use bool_ext::BoolExt;
     ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Foo;
-    ///
     /// let mut vec = vec![1, 2, 3];
     /// let res = std::panic::catch_unwind(|| {
     ///     vec.contains(&4).expect("Test expected `true`, but found `false`");
@@ -582,6 +560,38 @@ pub trait BoolExt {
     /// assert!(res.is_err());
     /// ```
     fn expect(self, msg: &str);
+    /// ## Transforms `false` => `panic!()`
+    /// ## panic with message if `false`, otherwise do nothing
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// let supposedly_unique_value = 42;
+    /// let values_already_seen = vec![1, 2, 3];
+    ///
+    /// let res = std::panic::catch_unwind(|| {
+    ///     values_already_seen.contains(&supposedly_unique_value)
+    ///                        .expect_false("Test expected `false`, but found `true`");
+    /// });
+    /// // Did not panic
+    /// assert!(res.is_ok());
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// let supposedly_unique_value = 42;
+    /// let values_already_seen = vec![1, 2, 3, 42];
+    ///
+    /// let res = std::panic::catch_unwind(|| {
+    ///     values_already_seen.contains(&supposedly_unique_value)
+    ///                        .expect_false("Test expected `false`, but found `true`");
+    /// });
+    /// // Panicked
+    /// assert!(res.is_err());
+    /// ```
+    fn expect_false(self, msg: &str);
 }
 
 // Suppress clippy::use_self warning arising from use of `panic!()`
@@ -729,5 +739,10 @@ impl BoolExt for bool {
             true => (),
             false => panic!("{}", msg),
         }
+    }
+
+    #[inline]
+    fn expect_false(self, msg: &str) {
+        self.not().expect(msg)
     }
 }
