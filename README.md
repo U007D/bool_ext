@@ -5,24 +5,21 @@ A crate which defines and implements a complete set of Boolean functional combin
 ### Aren't there already crates like this?
 Yes, there are, notably Daniel Keep's [boolinator](https://crates.io/crates/boolinator), and 
 Rust's [`then()` and `then_some()`](https://doc.rust-lang.org/std/primitive.bool.html#method.then
-) methods (currently unstable at the time of this writing).
+) methods.
 
 `boolinator` is a great crate and serves as an inspiration for this crate, as do some other sources.
 However, `boolinator`'s provided set of combinators is not as complete as one might wish for (and, 
 relatively minor nit, nor are the combinator names as short as they could be.  `boolinator`'s
 interface is also stable (i.e. >v1.0.0) so this would be disruptive to address.)  
 
-In Rust's case it has (and is expected to) take a long time to stabilize the names for the
-functional combinators, as standardizing on the name has proven to be 
-[difficult](https://github.com/rust-lang/rust/issues/64260).  Further, `std` is conservative by
- design, and will only very slowly move toward a complete set of combinators for `bool`.
+In Rust's case, `std` is conservative by design, and will only very slowly move toward a complete set of combinators for `bool`.
  
 My hope is that this crate can serve as a testing ground for both the naming and scope of
 boolean combinators to help inform the Rust lang team's discussion and decisions with usage data
 and feedback. 
 
 ### It's just a bool--why is the API surface so large?
-Because `bool` is a very versatile data type!  For example, adding to a collection only if the
+Well, because `bool` is a very versatile data type!  For example, adding to a collection only if the
 item in question is not already present is a common operation.  `Map` datatypes often give you
 this behavior by the nature of their design.  Other containers such as `Vec`, do not.  So instead
 of highly stateful, imperative code:
@@ -85,6 +82,7 @@ pointed out, `std::ops::Not` alleviates this.  Thank you, izik1! :)
 
 ## License
 Licensed under either:
+
     * MIT license (see LICENSE-MIT file)
     * Apache License, Version 2.0 (see LICENSE-APACHE file)
 at your option.

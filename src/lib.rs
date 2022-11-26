@@ -386,6 +386,29 @@ pub trait BoolExt {
     ///
     /// let vec = vec![1, 2, 3];
     ///
+    /// assert!(vec.contains(&2).map("no", "yes") == "yes");
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    /// use std::fmt::Formatter;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&4).map("no", "yes") == "no");
+    /// ```
+    fn map<T>(self, f: T, t: T) -> T;
+
+    /// `bool` => `T`
+    /// ## Transforms `true` => `T`, `false` => `T`
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    /// use std::fmt::Formatter;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
     /// assert!(vec.contains(&2).map_or(0, || {
     ///     //... some computation
     ///     42
@@ -403,7 +426,7 @@ pub trait BoolExt {
     ///     Some(42)
     /// }) == None);
     /// ```
-    fn map_or<F: FnOnce() -> T, T>(self, default: T, t: F) -> T;
+    fn map_or<F: FnOnce() -> T, T>(self, f: T, t: F) -> T;
 
     /// `bool` => `T`
     /// ## Transforms `true` => `T`, `false` => `T::default()`
@@ -682,10 +705,18 @@ impl BoolExt for bool {
     }
 
     #[inline]
-    fn map_or<F: FnOnce() -> T, T>(self, default: T, t: F) -> T {
+    fn map<T>(self, f: T, t: T) -> T {
+        match self {
+            true => t,
+            false => f,
+        }
+    }
+
+    #[inline]
+    fn map_or<F: FnOnce() -> T, T>(self, f: T, t: F) -> T {
         match self {
             true => t(),
-            false => default,
+            false => f,
         }
     }
 
