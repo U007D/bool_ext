@@ -166,7 +166,7 @@ pub trait BoolExt {
     #[allow(clippy::result_unit_err)]
     fn and_ok<T>(self, ok: T) -> Result<T, ()>;
 
-    /// ## Transforms `true` => `Ok(T)`, `false` => `Err(())`
+    /// ## Transforms `true` => `Ok(T)`, `false` => `Err(())`, lazily evaluated
     /// ### Examples:
     /// ```
     /// use assert2::assert;
@@ -204,7 +204,7 @@ pub trait BoolExt {
     #[allow(clippy::result_unit_err)]
     fn and_ok_with<F: FnOnce() -> T, T>(self, ok: F) -> Result<T, ()>;
 
-    /// ## Transforms `true` => `Ok(T)`, `false` => `Err(())`, lazily evaluated
+    /// ## Transforms `true` => `Err(())`, `false` => `Ok(T)`
     /// ### Examples:
     /// ```
     /// use assert2::assert;
@@ -232,7 +232,7 @@ pub trait BoolExt {
     #[allow(clippy::result_unit_err)]
     fn or_ok<T>(self, ok: T) -> Result<T, ()>;
 
-    /// ## Transforms `true` => `Err(())`, `false` => `Ok(T)`
+    /// ## Transforms `true` => `Err(())`, `false` => `Ok(T)`, lazily evaluated
     /// ### Examples:
     /// ```
     /// use assert2::assert;
@@ -265,7 +265,7 @@ pub trait BoolExt {
     #[allow(clippy::result_unit_err)]
     fn or_ok_with<F: FnOnce() -> T, T>(self, ok: F) -> Result<T, ()>;
 
-    /// ## Transforms `true` => `Err(())`, `false` => `Ok(T)`, lazily evaluated
+    /// ## Transforms `true` => `Err(E)`, `false` => `Ok(())`
     /// ### Examples:
     /// ```
     /// use assert2::assert;
@@ -291,7 +291,7 @@ pub trait BoolExt {
     /// ```
     fn and_err<E>(self, err: E) -> Result<(), E>;
 
-    /// ## Transforms `true` => `Err(E)`, `false` => `Ok(())`
+    /// ## Transforms `true` => `Err(E)`, `false` => `Ok(())`, lazily evaluated
     /// ### Examples:
     /// ```
     /// use assert2::assert;
@@ -329,7 +329,7 @@ pub trait BoolExt {
     #[allow(clippy::result_unit_err)]
     fn and_err_with<F: FnOnce() -> E, E>(self, err: F) -> Result<(), E>;
 
-    /// ## Transforms `true` => `Err(E)`, `false` => `Ok(())`, lazily evaluated
+    /// ## Transforms `true` => `Ok(())`, `false` => `Err(E)`
     /// ### Examples:
     /// ```
     /// use assert2::assert;
@@ -355,7 +355,7 @@ pub trait BoolExt {
     /// ```
     fn or_err<E>(self, err: E) -> Result<(), E>;
 
-    /// ## Transforms `true` => `Ok(())`, `false` => `Err(E)`
+    /// ## Transforms `true` => `Ok(())`, `false` => `Err(E)`, lazily evaluated
     /// ### Examples:
     /// ```
     /// use assert2::assert;
