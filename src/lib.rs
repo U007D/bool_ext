@@ -139,6 +139,114 @@ pub trait BoolExt {
     #[allow(clippy::wrong_self_convention, clippy::result_unit_err)]
     fn to_result(self) -> Result<(), ()>;
 
+    /// ## Transforms `true` => `Some(T)`, `false` => `None`
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&2).and_some(Foo) == Some(Foo));
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&4).and_some(Foo) == None);
+    /// ```
+    #[allow(clippy::result_unit_err)]
+    fn and_some<T>(self, some: T) -> Option<T>;
+
+    /// ## Transforms `true` => `Some(T)`, `false` => `None`
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&2).and_some_with(|| Foo) == Some(Foo));
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&4).and_some_with(|| Foo) == None);
+    /// ```
+    #[allow(clippy::result_unit_err)]
+    fn and_some_with<F: FnOnce() -> T, T>(self, some: F) -> Option<T>;
+
+    /// ## Transforms `true` => `None`, `false` => `Some(T)`
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&2).or_some(Foo) == None);
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&4).or_some(Foo) == Some(Foo));
+    /// ```
+    #[allow(clippy::result_unit_err)]
+    fn or_some<T>(self, none: T) -> Option<T>;
+
+    /// ## Transforms `true` => `None`, `false` => `Some(T)`
+    /// ### Examples:
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&2).or_some_with(|| Foo) == None);
+    /// ```
+    /// ```
+    /// use assert2::assert;
+    /// use bool_ext::BoolExt;
+    ///
+    /// #[derive(Debug, PartialEq)]
+    /// struct Foo;
+    ///
+    /// let vec = vec![1, 2, 3];
+    ///
+    /// assert!(vec.contains(&4).or_some_with(|| Foo) == Some(Foo));
+    /// ```
+    #[allow(clippy::result_unit_err)]
+    fn or_some_with<F: FnOnce() -> T, T>(self, some: F) -> Option<T>;
+
     /// ## Transforms `true` => `Ok(T)`, `false` => `Err(())`
     /// ### Examples:
     /// ```
@@ -777,6 +885,20 @@ impl BoolExt for bool {
         }
     }
 
+    fn and_some<T>(self, some: T) -> Option<T> {
+        match self {
+            true => Some(some),
+            false => None,
+        }
+    }
+
+    fn and_some_with<F: FnOnce() -> T, T>(self, some: F) -> Option<T> {
+        match self {
+            true => Some(some()),
+            false => None,
+        }
+    }
+
     #[inline]
     fn and_ok<T>(self, ok: T) -> Result<T, ()> {
         match self {
@@ -790,6 +912,20 @@ impl BoolExt for bool {
         match self {
             true => Ok(ok()),
             false => Err(()),
+        }
+    }
+
+    fn or_some<T>(self, some: T) -> Option<T> {
+        match self {
+            true => None,
+            false => Some(some),
+        }
+    }
+
+    fn or_some_with<F: FnOnce() -> T, T>(self, some: F) -> Option<T> {
+        match self {
+            true => None,
+            false => Some(some()),
         }
     }
 
